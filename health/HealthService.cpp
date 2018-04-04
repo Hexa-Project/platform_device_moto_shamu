@@ -19,14 +19,50 @@
 #include <healthd/healthd.h>
 #include <health2/service.h>
 
-void healthd_board_init(struct healthd_config*) {
+#include "CycleCountBackupRestore.h"
+
+using ::device::motorola::shamu::health::CycleCountBackupRestore;
+
+static constexpr int kBackupTrigger = 20;
+static CycleCountBackupRestore ccBackupRestore;
+
+int cycle_count_backup(int battery_level)
+{
+    static int saved_soc = 0;
+    static int soc_inc = 0;
+    static bool is_first = true;
+
+    if (is_first) {
+        is_first = false;
+        saved_soc = battery_level;
+        return 0;
+    }
+
+    if (battery_level > saved_soc) {
+        soc_inc += battery_level - saved_soc;
+    }
+
+    saved_soc = battery_level;
+
+    if (soc_inc >= kBackupTrigger) {
+        ccBackupRestore.Backup();
+        soc_inc = 0;
+    }
+    return 0;
 }
 
-int healthd_board_battery_update(struct android::BatteryProperties*) {
-    // return 0 to log periodic polled battery status to kernel log
-    return 1;
+// See : hardware/interfaces/health/2.0/README
+
+void healthd_board_init(struct healthd_config*)
+{
+    ccBackupRestore.Restore();
 }
 
-int main() {
+int healthd_board_battery_update(struct android::BatteryProperties *props)
+{
+    return cycle_count_backup(props->batteryLevel);
+}
+
+int main(void) {
     return health_service_main();
 }

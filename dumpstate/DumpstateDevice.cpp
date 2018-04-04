@@ -68,6 +68,7 @@ Return<void> DumpstateDevice::dumpstateBoard(const hidl_handle& handle) {
     DumpFileToFd(fd, "HSIC data events", "/d/xhci_msm_hsic_dbg/show_data_events");
     DumpFileToFd(fd, "USB PM events", "/d/usb_pm_hsic_dbg/show_usb_pm_events");
     DumpFileToFd(fd, "MDSS registers", "/d/mdp/reg_dump");
+    DumpFileToFd(fd, "Battery cycle count", "/sys/class/power_supply/battery/cycle_count");
     RunCommandToFd(fd, "Subsystem Tombstone list", {"ls", "-l", "/data/tombstones/ramdump"}, CommandOptions::AS_ROOT);
     RunCommandToFd(fd, "ION CLIENTS", {"/system/bin/sh", "-c", "for f in $(ls /d/ion/clients/*); do echo $f; cat $f; done"}, CommandOptions::AS_ROOT);
     RunCommandToFd(fd, "ION HEAPS",   {"/system/bin/sh", "-c", "for f in $(ls /d/ion/heaps/*);   do echo $f; cat $f; done"}, CommandOptions::AS_ROOT);

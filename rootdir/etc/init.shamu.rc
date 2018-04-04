@@ -46,6 +46,9 @@ on fs
     mkdir /fsg 0755 root root
     mount ext4 /dev/block/platform/msm_sdcc.1/by-name/mdm1m9kefs3 /fsg ro nosuid nodev barrier=0 context=u:object_r:fsg_file:s0
 
+    # for android.hardware.health@2.0-service.shamu cycle count backup
+    mkdir /persist/battery 0700 system system
+
     restorecon_recursive /persist
     mkdir /persist/data 0700 system system
     mkdir /persist/data/sfs 0700 system system
@@ -221,6 +224,11 @@ on early-boot
     #esoc0 (mdm)
     write /sys/bus/msm_subsys/devices/subsys3/restart_level "related"
     write /sys/bus/msm_subsys/devices/subsys3/recovery_policy "skip_restart"
+
+    # dumpstate needs to read, vendor.health-hal needs to be able to RW
+    chown system system /sys/devices/f9925000.i2c/i2c-0/0-001c/power_supply/battery/cycle_count
+    # HardwareInfo needs to be able to read CC bins
+    chmod 644 /sys/devices/f9925000.i2c/i2c-0/0-001c/power_supply/battery/cycle_count
 
 on boot
     chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
