@@ -230,6 +230,11 @@ on early-boot
     # HardwareInfo needs to be able to read CC bins
     chmod 644 /sys/devices/f9925000.i2c/i2c-0/0-001c/power_supply/battery/cycle_count
 
+    # dumpstate needs to read, vendor.health-hal needs to be able to RW
+    chown system system /sys/devices/f9925000.i2c/i2c-0/0-001c/power_supply/battery/charge_full
+    # HardwareInfo needs to be able to read charge_full
+    chmod 644 /sys/devices/f9925000.i2c/i2c-0/0-001c/power_supply/battery/charge_full
+
 on boot
     chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/type

@@ -20,11 +20,14 @@
 #include <health2/service.h>
 
 #include "CycleCountBackupRestore.h"
+#include "LearnedCapacityBackupRestore.h"
 
 using ::device::motorola::shamu::health::CycleCountBackupRestore;
+using ::device::motorola::shamu::health::LearnedCapacityBackupRestore;
 
 static constexpr int kBackupTrigger = 20;
 static CycleCountBackupRestore ccBackupRestore;
+static LearnedCapacityBackupRestore lcBackupRestore;
 
 int cycle_count_backup(int battery_level)
 {
@@ -56,11 +59,14 @@ int cycle_count_backup(int battery_level)
 void healthd_board_init(struct healthd_config*)
 {
     ccBackupRestore.Restore();
+    lcBackupRestore.Restore();
 }
 
 int healthd_board_battery_update(struct android::BatteryProperties *props)
 {
-    return cycle_count_backup(props->batteryLevel);
+    cycle_count_backup(props->batteryLevel);
+    lcBackupRestore.Backup();
+    return 0;
 }
 
 int main(void) {
